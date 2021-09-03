@@ -1,3 +1,58 @@
+# Context
+
+This was originally a solution to a hiring challenge. I didn't particularly
+care about the role, but I was interested in toying with an idea I'd been
+thinking about recently known as
+[part blindness](https://www.hxa.name/notes/note-hxa7241-20131124T0927Z.html),
+so I took this as a platform to experiment with that.
+
+Naturally, the final solution isn't a particularly good solution for the
+problem. It's way too complicated, and nobody should be using anything like
+this in production. As a friend I showed this to earlier remarked, you can
+probably solve this in two lines of python.
+
+The gist of what I tried out here was to _minimize the use of naked ifs_.
+For example, one constraint of the problem is that unique characters had to
+appear without a number next to them. This _could_ be done by keeping just
+a number and using an if condition, but instead, I defined this type:
+
+```ml
+type count =
+  | Single
+  | Multiple of int
+```
+
+Along with ensuring that there was only one place where the `Multiple`
+constructor could appear, i.e. in a specially defined `inc` function:
+
+```ml
+let inc = function
+  | Single -> Multiple 2
+  | Multiple n -> Multiple (n + 1)
+```
+
+(As an aside, ideally I could've used a range type in Multiple to ensure
+it was always >= 2, but ocaml doesn't have those :'()
+
+Now, when I was generating the string for each character, I would _have_ to
+deal with the situation where there was only one character, and because the
+provenance of the condition was carried with the number stored _only_ along with
+`Multiple`, the number of ways I could mess up were drastically cut down.
+
+On the other hand, it turned out to be more complex when you had multiple
+chained `if`s that you wanted to eliminate, and the code became more and more
+unwieldy. Eventually I cut it short and left two `if`s in place.
+
+So this turned out to be a pretty interesting experiment in the end. I spent
+~30 minutes solving the problem itself, but the flipside is that I spent
+exactly 0 minutes debugging it. Thinking of a way to avoid part blindness in
+the core of the problem, along with the strict typechecking and refinement of
+information meant that there _were_ very few ways I could mess it up. I'm
+pretty happy with my solution, and while it is too complex, I'll be thinking
+of ways to simplify it while retaining the power of this kind of solution.
+
+I've retained the hiring challenge text as-is under the Usage section below.
+
 # Usage
 
 This solution is written in OCaml 4.11, though any OCaml version after 4.05
@@ -5,7 +60,8 @@ should be OK.
 
 To run this solution,
 
-1. Install ocaml. The OCaml website maintains [an install page](https://ocaml.org/docs/install.html).
+1. Install ocaml. The OCaml website maintains
+   [an install page](https://ocaml.org/docs/install.html).
 
 2. No packages are required for the main program itself, however, `OUnit2`
    and `ocamlfind` are required to run tests. Install them with:
@@ -33,47 +89,6 @@ make test
 ```
 
 to run tests.
-
-## Preamble
-
-```
-  > re: Notice from HQ                                      [2021-08-16]
-
-  We are now accepting applications for several new technical positions:
-
-        Senior Mobile Development [Flutter|Dart|Native]
-        Quality Assurance Engineer [Elixir|Python|Ruby]
-        Backend Engineer [Python, Devops|AWS|SRE|Ruby]
-
-  For each of these, experience as team lead or project owner is a bonus
-  but not required (we want programmers, first and foremost). The mobile
-  position is on our mobile team, no surprise, and will help us organize
-  and define the work driven by our roadmap. Daily communication between
-  us and our remote PM is also expected.
-
-  The QA Engineer will be the first dedicated QA on our team and as such
-  will help us build out our testing program. They will also take on the
-  responsiblity for one or more of the test suites as well (depending on
-  the language or type of testing they're most comfortable with).
-
-  Our Backend Engineer role is a modern take on the old classic. We have
-  a linux-based infrastructure that we built and maintain which requires
-  ongoing care and attention, including scripts and other plumbing. They
-  will help us maintain and automate that infrastructure as well as help
-  us explore options for a more service-based approach.
-
-   We are an equal opportunity employer. If you're not sure whether your
-   skills and experience would be a good fit, please email us anyway and
-   we can figure it out together. At the very least, we'll be pleased to
-   offer you any constructive feedback we can (but only if you ask). 🌻
-
-  We will have more positions opening up towards the end of this year or
-  early next year so if other roles may be a better fit for you, keep an
-  eye out around then. -- QC
-
-```
-
----
 
 # Exercise
 
